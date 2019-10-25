@@ -6,16 +6,14 @@ services:
     restart: on-failure
     ports:
       - "8080:8080"
-  hapi-fhir-mysql:
-    image: mysql:latest
-    container_name: hapi-fhir-mysql
+
+  hapi-fhir-mssql:
+    image: mcr.microsoft.com/mssql/server:2017-CU14-ubuntu
+    container_name: hapi_fhir-mssql
     restart: always
     environment:
-      MYSQL_DATABASE: 'hapi'
-      MYSQL_USER: 'admin'
-      MYSQL_PASSWORD: 'admin'
-      MYSQL_ROOT_PASSWORD: 'admin'
+      ACCEPT_EULA: 'Y'
+      SA_PASSWORD: 'myv1tal$$'
+      MSSQL_PID: 'Express'
     volumes:
-      - hapi-fhir-mysql:/var/lib/mysql
-volumes:
-  hapi-fhir-mysql:
+      - /data/fhir-db:/var/opt/mssql
