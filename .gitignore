@@ -158,3 +158,11 @@ Icon
 Network Trash Folder
 Temporary Items
 .apdisk
+
+nifi-config/
+nifi-process-groups/
+register-nifi-flows.sh
+remove-nifi-bucket.sh
+resources/
+src/main/webapp/img/vital-logo.png
+

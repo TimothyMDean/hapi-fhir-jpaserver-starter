@@ -1,15 +1,9 @@
 version: "3"
 services:
-  hapi-fhir-jpaserver-start:
-    build: .
-    container_name: hapi-fhir-jpaserver-start
-    restart: on-failure
-    ports:
-      - "8080:8080"
 
   hapi-fhir-mssql:
     image: mcr.microsoft.com/mssql/server:2017-CU14-ubuntu
-    container_name: hapi_fhir-mssql
+    container_name: ms-sql
     restart: always
     environment:
       ACCEPT_EULA: 'Y'
@@ -17,3 +11,54 @@ services:
       MSSQL_PID: 'Express'
     volumes:
       - /data/fhir-db:/var/opt/mssql
+
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.4.1
+    container_name: elasticsearch
+    restart: always
+    volumes:
+      - /data/elasticsearch:/usr/share/elasticsearch/data
+    ports:
+      - 9200:9200
+    environment:
+      - discovery.type=single-node
+      - cluster.name=vitrea-intelligence
+      - "ES_JAVA_OPTS=-Xms31g -Xmx31g"
+
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+
+  nifi-registry:
+    image: apache/nifi-registry:0.5.0
+    container_name: nifi-registry
+    restart: always
+    ports:
+      - 18080:18080
+
+  nifi:
+    image: apache/nifi:1.10.0
+    container_name: nifi
+    restart: always
+    volumes:
+      - ./nifi-config:/opt/nifi/nifi-current/conf
+      - ./nifi-lib:/opt/codex/nifi/nars
+      - ./nifi-process-groups:/opt/codex/nifi/process-groups
+    ports:
+      - "80:8080"
+      - "11112:11112"
+    depends_on:
+      - nifi-registry
+      - hapi-fhir-jpaserver
+      - elasticsearch
+
+  hapi-fhir-jpaserver:
+    build: .
+    container_name: fhir-server
+    restart: on-failure
+    ports:
+      - "8080:8080"
+    depends_on:
+      - hapi-fhir-mssql
+
