@@ -4,7 +4,7 @@ import ca.uhn.fhir.jpa.binstore.DatabaseBlobBinaryStorageSvcImpl;
 import ca.uhn.fhir.jpa.binstore.IBinaryStorageSvc;
 import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
-import ca.uhn.fhir.jpa.subscription.module.cache.SubscriptionDeliveryHandlerFactory;
+import ca.uhn.fhir.jpa.subscription.module.channel.SubscriptionDeliveryHandlerFactory;
 import ca.uhn.fhir.jpa.subscription.module.subscriber.email.IEmailSender;
 import ca.uhn.fhir.jpa.subscription.module.subscriber.email.JavaMailEmailSender;
 import org.apache.commons.dbcp2.BasicDataSource;
@@ -104,6 +104,9 @@ public class FhirServerConfigCommon {
         Long reuseCachedSearchResultsMillis = HapiProperties.getReuseCachedSearchResultsMillis();
         retVal.setReuseCachedSearchResultsForMillis(reuseCachedSearchResultsMillis);
         ourLog.info("Server configured to cache search results for {} milliseconds", reuseCachedSearchResultsMillis);
+
+        Long retainCachedSearchesMinutes = HapiProperties.getExpireSearchResultsAfterMins();
+        retVal.setExpireSearchResultsAfterMillis(retainCachedSearchesMinutes * 60 * 1000);
 
         // Subscriptions are enabled by channel type
         if (HapiProperties.getSubscriptionRestHookEnabled()) {
